@@ -10,13 +10,15 @@ import javax.microedition.khronos.opengles.GL10
 class OpenGLRenderer(private val context: Context): GLSurfaceView.Renderer{
 
     private lateinit var backgroundSquare: GLBackgroundSquare
+    private lateinit var colorCube: ColorCube
     private val vpMatrix = FloatArray(16)
     private val projectionMatrix = FloatArray(16)
     private val viewMatrix = FloatArray(16)
-
+    private var angle = 0f
     private var ratio = 0f
 
     override fun onDrawFrame(gl: GL10?) {
+        angle += 1f
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
 
         val square = FloatArray(16)
@@ -36,6 +38,15 @@ class OpenGLRenderer(private val context: Context): GLSurfaceView.Renderer{
         val squareMvp = FloatArray(16)
         Matrix.multiplyMM(squareMvp,0,vpMatrix,0,square,0)
         backgroundSquare.draw(squareMvp)
+
+        val cube = FloatArray(16)
+        Matrix.setIdentityM(cube, 0)
+        Matrix.translateM(cube,0,0f,0f,-3f)
+        Matrix.rotateM(cube,0,angle,0f,1f,0f)
+        Matrix.rotateM(cube,0,20f,1f,0f,0f)
+        val cubeMvp = FloatArray(16)
+        Matrix.multiplyMM(cubeMvp,0,vpMatrix,0,cube,0)
+        colorCube.draw(cubeMvp)
     }
 
     override fun onSurfaceChanged(
@@ -63,6 +74,7 @@ class OpenGLRenderer(private val context: Context): GLSurfaceView.Renderer{
         GLES20.glEnable(GLES20.GL_DEPTH_TEST)
 
         backgroundSquare = GLBackgroundSquare(context)
+        colorCube = ColorCube()
 
         Matrix.setLookAtM(
             viewMatrix, 0,
