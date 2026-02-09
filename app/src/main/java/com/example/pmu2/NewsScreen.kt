@@ -32,25 +32,27 @@ import com.example.pmu2.ui.theme.Orange
 import com.example.pmu2.ui.theme.Pink40
 import com.example.pmu2.ui.theme.Violet
 
-@Composable
-fun MainScreen(viewModel: NewsViewModel, modifier: Modifier = Modifier){
-    val newsList by viewModel.currentNews.collectAsStateWithLifecycle()
+//@Composable
+//fun MainScreen(viewModel: NewsViewModel, modifier: Modifier = Modifier){
+//    val newsList by viewModel.currentNews.collectAsStateWithLifecycle()
+//
+//    FourQuartersScreen(
+//        newsList = newsList,
+//        getDisplayLikes = { news -> viewModel.getDisplayLikes(news) },
+//        onToggleLike = { news -> viewModel.toggleLike(news) },
+//        modifier = modifier
+//    )
+//}
 
-    FourQuartersScreen(
-        newsList = newsList,
-        getDisplayLikes = { news -> viewModel.getDisplayLikes(news) },
-        onToggleLike = { news -> viewModel.toggleLike(news) },
-        modifier = modifier
-    )
-}
-
 @Composable
-private fun FourQuartersScreen(
-    newsList:List<NewsItem>,
+fun FourQuartersScreen(
+    viewModel: NewsViewModel,
     getDisplayLikes: (NewsItem) -> Int,
     onToggleLike: (NewsItem) -> Unit,
     modifier: Modifier = Modifier
 ){
+    val newsList by viewModel.currentNews.collectAsStateWithLifecycle()
+
     if (newsList.size != 4){
         Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center){
             Text("Ожидается 4 новости")

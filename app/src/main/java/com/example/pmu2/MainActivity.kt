@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
         insetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
         setContent {
-            MainScreen(viewModel = viewModel)
+            MainTabs(viewModel = viewModel)
         }
     }
 }
