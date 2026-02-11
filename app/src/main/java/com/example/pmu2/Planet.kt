@@ -17,6 +17,7 @@ class Planet(
 
         Matrix.rotateM(model, 0, angle * orbitSpeed, 0f, 1f, 0f)
         Matrix.translateM(model, 0, orbitRadius * scale, 0f, 0f)
+        Matrix.rotateM(model, 0, angle*1f, 0f, 1f, 0f)
         Matrix.scaleM(model, 0, size * scale, size * scale, size * scale)
 
         val mvp = FloatArray(16)

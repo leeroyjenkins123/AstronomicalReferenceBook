@@ -40,17 +40,17 @@ class OpenGLRenderer(private val context: Context) : GLSurfaceView.Renderer {
         background = GLBackgroundSquare(context)
 
         // Планеты (сферы)
-        sun = Planet(SpherePlanet(floatArrayOf(1f, 1f, 0f, 1f)), 0f, 0.5f, 0f)
-        mercury = Planet(SpherePlanet(floatArrayOf(0.7f, 0.7f, 0.7f, 1f)), 0.8f, 0.10f, 4f)
-        venus = Planet(SpherePlanet(floatArrayOf(1f, 0.6f, 0.1f, 1f)), 1.2f, 0.15f, 3f)
-        earth = Planet(SpherePlanet(floatArrayOf(0f, 0.5f, 1f, 1f)), 1.6f, 0.18f, 2f)
-        mars = Planet(SpherePlanet(floatArrayOf(1f, 0.3f, 0.2f, 1f)), 2.0f, 0.14f, 1.6f)
-        jupiter = Planet(SpherePlanet(floatArrayOf(1f, 0.8f, 0.5f, 1f)), 2.8f, 0.30f, 1.2f)
-        saturn = Planet(SpherePlanet(floatArrayOf(1f, 1f, 0.6f, 1f)), 3.6f, 0.26f, 1f)
-        uranus = Planet(SpherePlanet(floatArrayOf(0.5f, 1f, 1f, 1f)), 4.0f, 0.22f, 0.8f)
-        neptune = Planet(SpherePlanet(floatArrayOf(0.3f, 0.3f, 1f, 1f)), 4.4f, 0.20f, 0.6f)
+        sun = Planet(SpherePlanet(context,R.drawable.sun1), 0f, 0.5f, 0f)
+        mercury = Planet(SpherePlanet(context,R.drawable.mercury1), 0.8f, 0.10f, 4f)
+        venus = Planet(SpherePlanet(context,R.drawable.venus1), 1.2f, 0.15f, 3f)
+        earth = Planet(SpherePlanet(context,R.drawable.earth1), 1.6f, 0.18f, 2f)
+        mars = Planet(SpherePlanet(context,R.drawable.mars1), 2.0f, 0.14f, 1.6f)
+        jupiter = Planet(SpherePlanet(context,R.drawable.jupiter1), 2.8f, 0.30f, 1.2f)
+        saturn = Planet(SpherePlanet(context,R.drawable.saturn1), 3.6f, 0.26f, 1f)
+        uranus = Planet(SpherePlanet(context,R.drawable.uranus1), 4.0f, 0.22f, 0.8f)
+        neptune = Planet(SpherePlanet(context,R.drawable.neptun1), 4.4f, 0.20f, 0.6f)
 
-        moonSphere = SpherePlanet(floatArrayOf(0.85f, 0.85f, 0.85f, 1f))
+        moonSphere = SpherePlanet(context,R.drawable.moon1)
 
         // Камера фиксированная
         Matrix.setLookAtM(
