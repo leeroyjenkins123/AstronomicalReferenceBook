@@ -8,10 +8,12 @@ import android.opengl.Matrix
 import com.example.pmu2.GLBackgroundSquare
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
+import kotlin.rem
 
 class OpenGLRenderer(private val context: Context) : GLSurfaceView.Renderer {
     private lateinit var background: GLBackgroundSquare
 
+    lateinit var cubeCursor: CubeCursor
     // Планеты
     private lateinit var sun: Planet
     private lateinit var mercury: Planet
@@ -39,12 +41,14 @@ class OpenGLRenderer(private val context: Context) : GLSurfaceView.Renderer {
 
         background = GLBackgroundSquare(context)
 
+        cubeCursor = CubeCursor()
+
         // Планеты (сферы)
         sun = Planet(SpherePlanet(context,R.drawable.sun1), 0f, 0.5f, 0f)
-        mercury = Planet(SpherePlanet(context,R.drawable.mercury1), 0.8f, 0.10f, 4f)
-        venus = Planet(SpherePlanet(context,R.drawable.venus1), 1.2f, 0.15f, 3f)
-        earth = Planet(SpherePlanet(context,R.drawable.earth1), 1.6f, 0.18f, 2f)
-        mars = Planet(SpherePlanet(context,R.drawable.mars1), 2.0f, 0.14f, 1.6f)
+        mercury = Planet(SpherePlanet(context,R.drawable.mercury1), 0.8f, 0.15f, 4f)
+        venus = Planet(SpherePlanet(context,R.drawable.venus1), 1.2f, 0.18f, 3f)
+        earth = Planet(SpherePlanet(context,R.drawable.earth1), 1.6f, 0.2f, 2f)
+        mars = Planet(SpherePlanet(context,R.drawable.mars1), 2.2f, 0.2f, 1.6f)
         jupiter = Planet(SpherePlanet(context,R.drawable.jupiter1), 2.8f, 0.30f, 1.2f)
         saturn = Planet(SpherePlanet(context,R.drawable.saturn1), 3.6f, 0.26f, 1f)
         uranus = Planet(SpherePlanet(context,R.drawable.uranus1), 4.0f, 0.22f, 0.8f)
@@ -88,6 +92,7 @@ class OpenGLRenderer(private val context: Context) : GLSurfaceView.Renderer {
 
         drawBackground()
         drawSolarSystem(systemScale)
+        cubeCursor.drawCursor(angle, vpMatrix, systemScale)
     }
 
     private fun drawBackground() {
@@ -101,7 +106,7 @@ class OpenGLRenderer(private val context: Context) : GLSurfaceView.Renderer {
         if (ratio > 1f)
             Matrix.scaleM(model, 0, 40f * ratio, 40f, 1f)
         else
-            Matrix.scaleM(model, 0, 20f, 20f / ratio, 1f)
+            Matrix.scaleM(model, 0, 25f, 25f / ratio, 1f)
 
         val mvp = FloatArray(16)
         Matrix.multiplyMM(mvp, 0, vpMatrix, 0, model, 0)
@@ -140,5 +145,13 @@ class OpenGLRenderer(private val context: Context) : GLSurfaceView.Renderer {
         val mvp = FloatArray(16)
         Matrix.multiplyMM(mvp, 0, vpMatrix, 0, model, 0)
         moonSphere.draw(mvp)
+    }
+
+    fun selectNext() {
+        cubeCursor.selectedIndex = (cubeCursor.selectedIndex + 1) % cubeCursor.objectPositions.size
+    }
+
+    fun selectPrev() {
+        cubeCursor.selectedIndex = if (cubeCursor.selectedIndex == 0) cubeCursor.objectPositions.size - 1 else cubeCursor.selectedIndex - 1
     }
 }

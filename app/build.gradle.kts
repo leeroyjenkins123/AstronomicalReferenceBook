@@ -9,7 +9,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.pmu22"
+        applicationId = "com.example.pmu23"
         minSdk = 24
         targetSdk = 36
         versionCode = 1

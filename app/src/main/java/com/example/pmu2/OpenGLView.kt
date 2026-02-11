@@ -14,4 +14,6 @@ class OpenGLView(context: Context): GLSurfaceView(context) {
 
         renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
     }
+
+    fun getRenderer(): OpenGLRenderer = renderer
 }
