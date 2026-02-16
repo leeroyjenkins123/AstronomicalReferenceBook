@@ -10,7 +10,7 @@ import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 import kotlin.rem
 
-class OpenGLRenderer(private val context: Context) : GLSurfaceView.Renderer {
+class OpenGLRenderer(private val context: Context, private val currentIndex: Int) : GLSurfaceView.Renderer {
     private lateinit var background: GLBackgroundSquare
 
     lateinit var cubeCursor: CubeCursor
@@ -42,6 +42,8 @@ class OpenGLRenderer(private val context: Context) : GLSurfaceView.Renderer {
         background = GLBackgroundSquare(context)
 
         cubeCursor = CubeCursor()
+
+        cubeCursor.selectedIndex = currentIndex
 
         // Планеты (сферы)
         sun = Planet(SpherePlanet(context,R.drawable.sun1), 0f, 0.5f, 0f)
@@ -154,4 +156,12 @@ class OpenGLRenderer(private val context: Context) : GLSurfaceView.Renderer {
     fun selectPrev() {
         cubeCursor.selectedIndex = if (cubeCursor.selectedIndex == 0) cubeCursor.objectPositions.size - 1 else cubeCursor.selectedIndex - 1
     }
+
+    fun getSelectedIndex(): Int = cubeCursor.selectedIndex
+
+    fun setSelectedIndex(index: Int) {
+        cubeCursor.selectedIndex = index
+    }
+
+
 }
