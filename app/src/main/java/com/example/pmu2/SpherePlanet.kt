@@ -15,7 +15,7 @@ import kotlin.math.sin
 class SpherePlanet(
     private val context: Context,
     private val textureResId: Int,  // Например, R.drawable.earth
-    stacks: Int = 24,
+    stacks: Int = 48,
     slices: Int = 48
 ) {
 
@@ -27,24 +27,24 @@ class SpherePlanet(
     private var textureId: Int = 0
 
     private val vertexShader = """
-        attribute vec4 aPosition;
-        attribute vec2 aTexCoord;
-        uniform mat4 uMVPMatrix;
-        varying vec2 vTexCoord;
+        attribute vec4 aPosition; // входная позиция вершины
+        attribute vec2 aTexCoord; // входная текстурная координата
+        uniform mat4 uMVPMatrix; // матрица Model-View-Projection
+        varying vec2 vTexCoord; // передается в фрагментный шейдер. Интерполирована между вершинами для каждого пикселя
         
         void main() {
-            gl_Position = uMVPMatrix * aPosition;
-            vTexCoord = aTexCoord;
+            gl_Position = uMVPMatrix * aPosition; // итоговая позиция вершины на экране
+            vTexCoord = aTexCoord; // копируем текстурную координату
         }
     """
 
     private val fragmentShader = """
-        precision mediump float;
-        varying vec2 vTexCoord;
-        uniform sampler2D uTexture;
+        precision mediump float; // указание точности вычислений
+        varying vec2 vTexCoord; // полученная текустурная координата
+        uniform sampler2D uTexture; // ссылка на двумерную текстуру 
         
         void main() {
-            gl_FragColor = texture2D(uTexture, vTexCoord);
+            gl_FragColor = texture2D(uTexture, vTexCoord); // операция выбора цвета из текстуры
         }
     """
 
