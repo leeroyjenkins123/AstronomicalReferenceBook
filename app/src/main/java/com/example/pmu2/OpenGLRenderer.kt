@@ -13,6 +13,8 @@ import kotlin.rem
 class OpenGLRenderer(private val context: Context, private val currentIndex: Int) : GLSurfaceView.Renderer {
     private lateinit var background: GLBackgroundSquare
 
+    private lateinit var borderLines: GLLines
+
     lateinit var cubeCursor: CubeCursor
     // Планеты
     private lateinit var sun: Planet
@@ -28,6 +30,8 @@ class OpenGLRenderer(private val context: Context, private val currentIndex: Int
     // Луна
     private lateinit var moonSphere: SpherePlanet
 
+    private lateinit var blackHole: SpherePlanet
+
     private val projectionMatrix = FloatArray(16)
     private val viewMatrix = FloatArray(16)
     private val vpMatrix = FloatArray(16)
@@ -35,13 +39,38 @@ class OpenGLRenderer(private val context: Context, private val currentIndex: Int
     private var ratio = 0f
     private var angle = 0f
 
+
+    // Позиция чёрной дыры
+    private var blackHoleX = 0f
+    private var blackHoleY = 0f
+    private var blackHoleZ = -50f
+
+    // Скорость движения
+    private var blackHoleSpeedX = 0.08f
+    private var blackHoleSpeedY = 0.05f
+
+    // Флаг исчезновения
+    private var blackHoleVisible = true
+
+    private var bgLimitX = 0f
+    private var bgLimitY = 0f
+
+    private var holeLimitX = 0f
+    private var holeLimitY = 0f
+
+
+
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-        GLES20.glClearColor(0f, 0f, 0f, 1f)
+        GLES20.glClearColor(1f, 1f, 1f, 1f)
         GLES20.glEnable(GLES20.GL_DEPTH_TEST)
 
         background = GLBackgroundSquare(context)
 
         cubeCursor = CubeCursor()
+
+        borderLines = GLLines()
+
+        blackHole = SpherePlanet(context, R.drawable.black_hole)
 
         cubeCursor.selectedIndex = currentIndex
 
@@ -71,6 +100,21 @@ class OpenGLRenderer(private val context: Context, private val currentIndex: Int
         GLES20.glViewport(0, 0, width, height)
         ratio = width.toFloat() / height
 
+        if (ratio > 1f) {
+            bgLimitX = 97f * ratio
+            bgLimitY = 97f
+        } else {
+            bgLimitX = 53f
+            bgLimitY = 53f / ratio
+        }
+
+        val backgroundZ = -80f
+        val depthFactor = blackHoleZ / backgroundZ // оба отрицательные, получится положительное число
+
+        holeLimitX = bgLimitX * depthFactor
+        holeLimitY = bgLimitY * depthFactor
+
+
         Matrix.frustumM(
             projectionMatrix, 0,
             -ratio, ratio,
@@ -91,8 +135,12 @@ class OpenGLRenderer(private val context: Context, private val currentIndex: Int
         } else {
             1f   // портретная — дальше
         }
+        updateBlackHole()
 
         drawBackground()
+        drawBlackHoleBorders()
+
+        drawBlackHole(systemScale)
         drawSolarSystem(systemScale)
         cubeCursor.drawCursor(angle, vpMatrix, systemScale)
     }
@@ -102,13 +150,13 @@ class OpenGLRenderer(private val context: Context, private val currentIndex: Int
         Matrix.setIdentityM(model, 0)
 
         // немного наклоняем фон под камеру
-        Matrix.rotateM(model, 0, -17f, 1f, 0f, 0f)
-        Matrix.translateM(model, 0, 0f, 0f, -30f)
+        Matrix.rotateM(model, 0, -16.8f, 1f, 0f, 0f)
+        Matrix.translateM(model, 0, 0f, 0f, -80f)
 
         if (ratio > 1f)
-            Matrix.scaleM(model, 0, 40f * ratio, 40f, 1f)
+            Matrix.scaleM(model, 0, 91f * ratio, 91f, 1f)
         else
-            Matrix.scaleM(model, 0, 25f, 25f / ratio, 1f)
+            Matrix.scaleM(model, 0, 50f, 50f / ratio, 1f)
 
         val mvp = FloatArray(16)
         Matrix.multiplyMM(mvp, 0, vpMatrix, 0, model, 0)
@@ -147,6 +195,74 @@ class OpenGLRenderer(private val context: Context, private val currentIndex: Int
         val mvp = FloatArray(16)
         Matrix.multiplyMM(mvp, 0, vpMatrix, 0, model, 0)
         moonSphere.draw(mvp)
+    }
+
+    private fun drawBlackHoleBorders() {
+        val model = FloatArray(16)
+        Matrix.setIdentityM(model, 0)
+
+        // рамка должна быть на том же Z, что и чёрная дыра
+        Matrix.rotateM(model, 0, -16.8f, 1f, 0f, 0f)
+        Matrix.translateM(model, 0, 0f, 0f, blackHoleZ)
+
+        val mvp = FloatArray(16)
+        Matrix.multiplyMM(mvp, 0, vpMatrix, 0, model, 0)
+
+        borderLines.drawRect(
+            -holeLimitX,
+            holeLimitX,
+            -holeLimitY,
+            holeLimitY,
+            mvp
+        )
+    }
+
+    private fun updateBlackHole() {
+        // Движение
+        blackHoleX += blackHoleSpeedX
+        blackHoleY += blackHoleSpeedY
+
+        // Отскок по X
+        if (blackHoleX > holeLimitX) {
+            blackHoleX = holeLimitX
+            blackHoleSpeedX = -blackHoleSpeedX
+        }
+        if (blackHoleX < -holeLimitX) {
+            blackHoleX = -holeLimitX
+            blackHoleSpeedX = -blackHoleSpeedX
+        }
+
+        if (blackHoleY > holeLimitY) {
+            blackHoleY = holeLimitY
+            blackHoleSpeedY = -blackHoleSpeedY
+        }
+        if (blackHoleY < -holeLimitY) {
+            blackHoleY = -holeLimitY
+            blackHoleSpeedY = -blackHoleSpeedY
+        }
+
+    }
+
+    private fun drawBlackHole(scale: Float) {
+        if (!blackHoleVisible) return
+
+        val model = FloatArray(16)
+        Matrix.setIdentityM(model, 0)
+        Matrix.rotateM(model, 0, -16.8f, 1f, 0f, 0f)
+        // Позиция
+        Matrix.translateM(model, 0, blackHoleX, blackHoleY, blackHoleZ)
+
+        Matrix.rotateM(model, 0, 25f,0f,1f,0f)
+        // Вращение
+//        Matrix.rotateM(model, 0, angle * 2f, 0f, 0f, 1f)
+
+        // Размер
+        Matrix.scaleM(model, 0, 0.8f*scale, 0.8f*scale, 0.8f*scale)
+
+        val mvp = FloatArray(16)
+        Matrix.multiplyMM(mvp, 0, vpMatrix, 0, model, 0)
+
+        blackHole.draw(mvp)
     }
 
     fun selectNext() {
