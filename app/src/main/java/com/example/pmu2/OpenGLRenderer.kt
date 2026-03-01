@@ -58,6 +58,9 @@ class OpenGLRenderer(private val context: Context, private val currentIndex: Int
     private var holeLimitX = 0f
     private var holeLimitY = 0f
 
+    private var screenWidth = 1f
+    private var screenHeight = 1f
+
 
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
@@ -98,6 +101,8 @@ class OpenGLRenderer(private val context: Context, private val currentIndex: Int
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
         GLES20.glViewport(0, 0, width, height)
+        screenWidth = width.toFloat()
+        screenHeight = height.toFloat()
         ratio = width.toFloat() / height
 
         if (ratio > 1f) {
@@ -160,7 +165,17 @@ class OpenGLRenderer(private val context: Context, private val currentIndex: Int
 
         val mvp = FloatArray(16)
         Matrix.multiplyMM(mvp, 0, vpMatrix, 0, model, 0)
-        background.draw(mvp)
+        val normalizedBHX = (blackHoleX / holeLimitX) * 0.5f + 0.5f
+        val normalizedBHY = (blackHoleY / holeLimitY) * 0.5f + 0.5f
+
+        background.draw(
+            mvp,
+            angle,
+            screenWidth,
+            screenHeight,
+            normalizedBHX,
+            1.0f - normalizedBHY // Инвертируем Y, так как в OpenGL координаты текстур идут снизу вверх
+        )
     }
 
     private fun drawSolarSystem(scale: Float) {
@@ -252,12 +267,12 @@ class OpenGLRenderer(private val context: Context, private val currentIndex: Int
         // Позиция
         Matrix.translateM(model, 0, blackHoleX, blackHoleY, blackHoleZ)
 
-        Matrix.rotateM(model, 0, 25f,0f,1f,0f)
+//        Matrix.rotateM(model, 0, 300f,1f,0f,0f)
         // Вращение
 //        Matrix.rotateM(model, 0, angle * 2f, 0f, 0f, 1f)
 
         // Размер
-        Matrix.scaleM(model, 0, 0.8f*scale, 0.8f*scale, 0.8f*scale)
+        Matrix.scaleM(model, 0, 0.1f*scale, 0.1f*scale, 0.8f*scale)
 
         val mvp = FloatArray(16)
         Matrix.multiplyMM(mvp, 0, vpMatrix, 0, model, 0)

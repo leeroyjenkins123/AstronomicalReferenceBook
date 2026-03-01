@@ -73,22 +73,44 @@ varying — значение интерполируется между верш�
         varying vec3 vPosition;   // позиция текущего пикселя в eye-space
         varying vec3 vNormal;     // нормаль в eye-space (уже нормализованная)
         varying vec2 vTexCoord;   // текстурные координаты (UV)
+        void main() {
+            vec3 texColor = texture2D(uTexture, vTexCoord).rgb;
+            vec3 n_normal = normalize(vNormal);
+            vec3 lightvector = normalize(uLightPos - vPosition);
+            vec3 lookvector = normalize(uViewPos - vPosition);
 
-         void main() {
-              vec3 texColor = texture2D(uTexture, vTexCoord).rgb;
-              vec3 n_normal=normalize(vNormal);
-              vec3 lightvector = normalize(uLightPos - vPosition);
-              vec3 lookvector = normalize(uViewPos - vPosition);
-              float ambient=0.2; // фоновое освещение
-              float k_diffuse=0.8; // сила диффузного освещения
-              float k_specular=0.4; // сила зеркального блика
-              float diffuse = k_diffuse * max(dot(n_normal, lightvector), 0.0); // коэффициент насколько сильно освещена поверхность за счет диффузного света
-              vec3 reflectvector = reflect(-lightvector, n_normal);
-              float specular = k_specular * pow( max(dot(lookvector,reflectvector),0.0), 40.0 );
-              vec4 one=vec4(1.0,1.0,1.0,1.0);
-              vec3 lighting = ambient * texColor + diffuse * texColor + specular * vec3(1.0);
-              gl_FragColor = vec4(lighting, 1.0);
-         }
+            float ambient = 0.2;
+            float k_diffuse = 0.8;
+            float k_specular = 0.4;
+
+            float diffuse = k_diffuse * max(dot(n_normal, lightvector), 0.0);
+
+            float specular = 0.0;
+            if (diffuse > 0.0) {
+                vec3 reflectvector = reflect(-lightvector, n_normal);
+                specular = k_specular * pow(max(dot(lookvector, reflectvector), 0.0), 40.0);
+            }
+
+            vec3 lighting = ambient * texColor + diffuse * texColor + specular * vec3(1.0);
+            gl_FragColor = vec4(lighting, 1.0);
+        }
+
+
+//         void main() {
+//              vec3 texColor = texture2D(uTexture, vTexCoord).rgb;
+//              vec3 n_normal=normalize(vNormal);
+//              vec3 lightvector = normalize(uLightPos - vPosition);
+//              vec3 lookvector = normalize(uViewPos - vPosition);
+//              float ambient=0.2; // фоновое освещение
+//              float k_diffuse=0.8; // сила диффузного освещения
+//              float k_specular=0.4; // сила зеркального блика
+//              float diffuse = k_diffuse * max(dot(n_normal, lightvector), 0.0); // коэффициент насколько сильно освещена поверхность за счет диффузного света
+//              vec3 reflectvector = reflect(-lightvector, n_normal);
+//              float specular = k_specular * pow( max(dot(lookvector,reflectvector),0.0), 40.0 );
+//              vec4 one=vec4(1.0,1.0,1.0,1.0);
+//              vec3 lighting = ambient * texColor + diffuse * texColor + specular * vec3(1.0);
+//              gl_FragColor = vec4(lighting, 1.0);
+//         }
     """.trimIndent()
 
     init {
